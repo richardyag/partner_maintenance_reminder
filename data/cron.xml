@@ -3,7 +3,8 @@
     <record id="cron_maintenance_reminder" model="ir.cron">
         <field name="name">Recordatorios de Mantenimiento Preventivo</field>
         <field name="model_id" ref="base.model_res_partner"/>
-        <field name="method_name">_cron_send_maintenance_reminders</field>
+        <field name="state">code</field>
+        <field name="code">model._cron_send_maintenance_reminders()</field>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
         <field name="active">True</field>

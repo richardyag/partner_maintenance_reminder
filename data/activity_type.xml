@@ -4,6 +4,6 @@
         <field name="name">Mantenimiento Preventivo</field>
         <field name="icon">fa-wrench</field>
         <field name="res_model">res.partner</field>
-        <field name="category">reminder</field>
+        <field name="category">default</field>
     </record>
 </odoo>

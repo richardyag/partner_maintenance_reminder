@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_maintenance" model="ir.ui.view">
+        <field name="name">res.partner.form.maintenance</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Mantenimiento" name="maintenance">
+                    <group>
+                        <group string="Contrato">
+                            <field name="contract_date"/>
+                            <field name="maintenance_interval"/>
+                            <field name="maintenance_responsible_id"/>
+                            <field name="maintenance_active"/>
+                        </group>
+                        <group string="Próximo mantenimiento">
+                            <field name="last_maintenance_date"/>
+                            <field name="next_maintenance_date"/>
+                        </group>
+                    </group>
+                    <div class="o_row mt-2">
+                        <button
+                            name="action_register_maintenance"
+                            type="object"
+                            string="Registrar mantenimiento realizado hoy"
+                            class="btn btn-secondary"
+                            confirm="¿Confirmar que el mantenimiento de este cliente fue realizado hoy?"
+                            invisible="not contract_date"
+                        />
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="activity_type_maintenance" model="mail.activity.type">
+        <field name="name">Mantenimiento Preventivo</field>
+        <field name="icon">fa-wrench</field>
+        <field name="decoration_type">warning</field>
+        <field name="res_model_id" ref="base.model_res_partner"/>
+        <field name="category">reminder</field>
+    </record>
+</odoo>

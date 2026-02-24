@@ -5,7 +5,7 @@ from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
-REMINDER_DAYS = (7, 3, 1)
+REMINDER_DAYS = (30, 7, 3, 1)
 
 
 class ResPartner(models.Model):
@@ -80,37 +80,52 @@ class ResPartner(models.Model):
             _logger.warning('Tipo de actividad de mantenimiento no encontrado')
             return
 
-        for days_ahead in REMINDER_DAYS:
-            target_date = today + relativedelta(days=days_ahead)
+        # Límites de cada ventana (no superpuestos, del más lejano al más cercano)
+        # 30d: ]7, 30]  7d: ]3, 7]  3d: ]1, 3]  1d: [0, 1]
+        windows = [
+            (30, 8,  30),
+            (7,  4,  7),
+            (3,  2,  3),
+            (1,  0,  1),
+        ]
+
+        for days_ahead, window_min, window_max in windows:
+            date_from = today + relativedelta(days=window_min)
+            date_to   = today + relativedelta(days=window_max)
+
             partners = self.search([
-                ('next_maintenance_date', '=', target_date),
+                ('next_maintenance_date', '>=', date_from),
+                ('next_maintenance_date', '<=', date_to),
                 ('maintenance_active', '=', True),
                 ('contract_date', '!=', False),
                 ('maintenance_interval', '!=', False),
             ])
             for partner in partners:
-                # Evitar actividades duplicadas para el mismo vencimiento
+                maintenance_date = partner.next_maintenance_date
+                # Evitar duplicados: ya existe actividad abierta para esta fecha
                 existing = self.env['mail.activity'].search([
                     ('res_model', '=', 'res.partner'),
                     ('res_id', '=', partner.id),
                     ('activity_type_id', '=', activity_type.id),
-                    ('date_deadline', '=', target_date),
+                    ('date_deadline', '=', maintenance_date),
                 ], limit=1)
                 if existing:
                     continue
 
-                responsible = partner.maintenance_responsible_id or self.env.ref('base.user_admin')
+                responsible = (
+                    partner.maintenance_responsible_id or self.env.ref('base.user_admin')
+                )
                 day_label = '1 día' if days_ahead == 1 else '%d días' % days_ahead
 
                 partner.activity_schedule(
                     'partner_maintenance_reminder.activity_type_maintenance',
-                    date_deadline=target_date,
+                    date_deadline=maintenance_date,
                     summary='Mantenimiento preventivo en %s — %s' % (day_label, partner.name),
                     note=(
                         'El cliente <strong>%s</strong> tiene mantenimiento programado '
                         'para el <strong>%s</strong>.' % (
                             partner.name,
-                            target_date.strftime('%d/%m/%Y'),
+                            maintenance_date.strftime('%d/%m/%Y'),
                         )
                     ),
                     user_id=responsible.id,
@@ -120,12 +135,12 @@ class ResPartner(models.Model):
                         'Recordatorio automático: mantenimiento en '
                         '<strong>%s</strong> (%s).' % (
                             day_label,
-                            target_date.strftime('%d/%m/%Y'),
+                            maintenance_date.strftime('%d/%m/%Y'),
                         )
                     ),
                     subtype_xmlid='mail.mt_note',
                 )
                 _logger.info(
-                    'Recordatorio de mantenimiento creado para %s (en %d días, fecha: %s)',
-                    partner.name, days_ahead, target_date,
+                    'Recordatorio de mantenimiento creado para %s (en ~%d días, fecha: %s)',
+                    partner.name, days_ahead, maintenance_date,
                 )

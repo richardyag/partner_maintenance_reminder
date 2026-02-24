@@ -1,101 +1,57 @@
-# Recordatorios de Mantenimiento Preventivo
+# Partner Maintenance Reminder
 
-Módulo para Odoo 19 que permite programar y recibir recordatorios automáticos de mantenimiento preventivo para cada cliente.
-
----
-
-## ¿Qué hace este módulo?
-
-- Agrega una pestaña **Mantenimiento** en cada contacto (cliente)
-- Calcula automáticamente la **fecha del próximo mantenimiento** según la frecuencia configurada
-- Genera **recordatorios automáticos** 7 días, 3 días y 1 día antes del vencimiento
-- Los recordatorios aparecen en el **chatter del contacto** y en el **panel de actividades** del responsable asignado
+Módulo para **Odoo 19** que gestiona recordatorios automáticos de mantenimiento preventivo para contactos/clientes.
 
 ---
 
-## Configuración por cliente
+## Funcionalidades
 
-### 1. Abrir el contacto
-
-Ir a **Contactos** y abrir el cliente al que se le quiere programar mantenimiento.
-
-### 2. Completar la pestaña Mantenimiento
-
-Dentro del formulario del contacto, hacer clic en la pestaña **Mantenimiento** y completar los siguientes campos:
-
-| Campo | Descripción |
-|-------|-------------|
-| **Fecha de contrato** | Fecha en que se firmó o inició el contrato de mantenimiento |
-| **Frecuencia de mantenimiento** | Cada 6 meses o cada 1 año |
-| **Responsable de mantenimiento** | Usuario de Odoo que recibirá los recordatorios |
-| **Recordatorios activos** | Debe estar activado (✅) para que el sistema envíe alertas |
-| **Último mantenimiento** | Fecha en que se realizó el último mantenimiento (se actualiza con el botón) |
-| **Próximo mantenimiento** | Se calcula automáticamente — no se edita manualmente |
-
-### 3. Guardar
-
-Hacer clic en **Guardar**. El campo **Próximo mantenimiento** se calculará automáticamente.
-
-> **Ejemplo:** Si la fecha de contrato es 15/01/2025 y la frecuencia es anual, el próximo mantenimiento será el 15/01/2026.
+- Pestaña **Mantenimiento** en cada contacto con fecha de contrato, frecuencia e historial
+- Cálculo automático de la **fecha del próximo mantenimiento**
+- Recordatorios automáticos en **6 momentos**: 60, 30, 15, 7, 3 y 1 día antes del vencimiento
+- Actividades asignadas al responsable, visibles en el panel de actividades (⏰)
+- Mensaje automático en el chatter del contacto en cada recordatorio
+- Al **completar la actividad** desde el reloj: registra el mantenimiento y recalcula la próxima fecha automáticamente
 
 ---
 
-## Cómo se calcula la fecha del próximo mantenimiento
+## Instalación
+
+1. Copiar el módulo en la carpeta de addons de Odoo
+2. Actualizar la lista de módulos
+3. Instalar **Partner Maintenance Reminder**
+
+**Dependencias:** `base`, `mail`
+
+---
+
+## Uso rápido
+
+1. Ir a **Contactos** → abrir un cliente
+2. Pestaña **Mantenimiento** → completar los campos
+3. Guardar → el sistema calcula la próxima fecha automáticamente
+4. El cron diario envía actividades al responsable según el calendario de recordatorios
+
+Ver [MANUAL_CLIENTE.md](MANUAL_CLIENTE.md) para la guía completa de uso.
+
+---
+
+## Estructura
 
 ```
-Próximo mantenimiento = Último mantenimiento + Frecuencia
-                        (o Fecha de contrato si no hay último mantenimiento)
+partner_maintenance_reminder/
+├── models/
+│   ├── res_partner.py        # Campos y lógica de mantenimiento + cron
+│   └── mail_activity.py      # Override action_feedback para registrar mantenimiento al completar
+├── data/
+│   ├── activity_type.xml     # Tipo de actividad "Mantenimiento Preventivo"
+│   └── cron.xml              # Cron diario
+└── views/
+    └── res_partner_views.xml # Pestaña Mantenimiento en el formulario de contactos
 ```
 
 ---
 
-## Dónde aparecen los recordatorios
+## Licencia
 
-El sistema genera recordatorios automáticamente **60, 30, 15, 7, 3 y 1 día antes** de la fecha de vencimiento.
-
-El sistema genera recordatorios automáticamente en **6 momentos** antes del vencimiento:
-
-| Anticipación | Cuándo se envía |
-|---|---|
-| 60 días | 2 meses antes |
-| 30 días | 1 mes antes |
-| 15 días | 2 semanas antes |
-| 7 días | 1 semana antes |
-| 3 días | 3 días antes |
-| 1 día | el día anterior |
-
-Los recordatorios aparecen en **dos lugares**:
-
-### En el chatter del contacto
-Dentro del contacto, en la sección de mensajes (parte inferior), aparece una nota automática indicando que el mantenimiento está próximo a vencer.
-
-### En el panel de actividades del responsable
-El ícono de reloj (⏰) en la barra superior de Odoo mostrará un contador con las actividades pendientes. Al hacer clic, el responsable verá el recordatorio con el nombre del cliente y la fecha de vencimiento.
-
----
-
-## Registrar un mantenimiento realizado
-
-Cuando se completa un mantenimiento:
-
-1. Abrir el contacto
-2. Ir a la pestaña **Mantenimiento**
-3. Hacer clic en el botón **"Registrar mantenimiento realizado hoy"**
-
-Esto actualiza automáticamente el campo **Último mantenimiento** con la fecha de hoy y recalcula la próxima fecha.
-
----
-
-## Preguntas frecuentes
-
-**¿Por qué no veo recordatorios de un cliente que cargué?**
-Los recordatorios se generan cuando el próximo mantenimiento está a 7, 3 o 1 día de distancia. Si la fecha ya pasó o está a más de 7 días, el sistema esperará hasta que entre en ese rango.
-
-**¿Con qué frecuencia corre el sistema?**
-Una vez por día, de forma automática.
-
-**¿Puedo desactivar los recordatorios para un cliente?**
-Sí, desactivando el campo **Recordatorios activos** en la pestaña Mantenimiento del contacto.
-
-**¿Qué pasa si no hay responsable asignado?**
-El recordatorio se asigna al administrador del sistema.
+LGPL-3 — Econovex

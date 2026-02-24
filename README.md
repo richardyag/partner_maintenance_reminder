@@ -51,9 +51,18 @@ Próximo mantenimiento = Último mantenimiento + Frecuencia
 
 ## Dónde aparecen los recordatorios
 
-El sistema genera recordatorios automáticamente **30 días, 7 días, 3 días y 1 día antes** de la fecha de vencimiento.
+El sistema genera recordatorios automáticamente **60, 30, 15, 7, 3 y 1 día antes** de la fecha de vencimiento.
 
-El sistema genera recordatorios automáticamente **30 días, 7 días, 3 días y 1 día antes** del vencimiento.
+El sistema genera recordatorios automáticamente en **6 momentos** antes del vencimiento:
+
+| Anticipación | Cuándo se envía |
+|---|---|
+| 60 días | 2 meses antes |
+| 30 días | 1 mes antes |
+| 15 días | 2 semanas antes |
+| 7 días | 1 semana antes |
+| 3 días | 3 días antes |
+| 1 día | el día anterior |
 
 Los recordatorios aparecen en **dos lugares**:
 

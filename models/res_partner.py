@@ -5,7 +5,7 @@ from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
-REMINDER_DAYS = (30, 7, 3, 1)
+REMINDER_DAYS = (60, 30, 15, 7, 3, 1)
 
 
 class ResPartner(models.Model):
@@ -83,10 +83,12 @@ class ResPartner(models.Model):
         # Límites de cada ventana (no superpuestos, del más lejano al más cercano)
         # 30d: ]7, 30]  7d: ]3, 7]  3d: ]1, 3]  1d: [0, 1]
         windows = [
-            (30, 8,  30),
-            (7,  4,  7),
-            (3,  2,  3),
-            (1,  0,  1),
+            (60, 31, 60),
+            (30, 16, 30),
+            (15,  8, 15),
+            (7,   4,  7),
+            (3,   2,  3),
+            (1,   0,  1),
         ]
 
         for days_ahead, window_min, window_max in windows:

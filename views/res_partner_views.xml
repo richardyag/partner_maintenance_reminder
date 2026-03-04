@@ -7,28 +7,24 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
                 <page string="Mantenimiento" name="maintenance">
-                    <group>
-                        <group string="Contrato">
+                    <field name="maintenance_contract_ids">
+                        <tree editable="bottom" string="Contratos de mantenimiento">
+                            <field name="name" placeholder="Ej: Compresor A, Caldera principal…"/>
                             <field name="contract_date"/>
                             <field name="maintenance_interval"/>
                             <field name="maintenance_responsible_id"/>
                             <field name="maintenance_active"/>
-                        </group>
-                        <group string="Próximo mantenimiento">
                             <field name="last_maintenance_date"/>
-                            <field name="next_maintenance_date"/>
-                        </group>
-                    </group>
-                    <div class="o_row mt-2">
-                        <button
-                            name="action_register_maintenance"
-                            type="object"
-                            string="Registrar mantenimiento realizado hoy"
-                            class="btn btn-secondary"
-                            confirm="¿Confirmar que el mantenimiento de este cliente fue realizado hoy?"
-                            invisible="not contract_date"
-                        />
-                    </div>
+                            <field name="next_maintenance_date" readonly="1"/>
+                            <button
+                                name="action_register_maintenance"
+                                type="object"
+                                string="Registrar hoy"
+                                icon="fa-check"
+                                confirm="¿Confirmar que el mantenimiento de este equipo fue realizado hoy?"
+                            />
+                        </tree>
+                    </field>
                 </page>
             </xpath>
         </field>

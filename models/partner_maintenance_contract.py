@@ -1,0 +1,83 @@
+# -*- coding: utf-8 -*-
+import logging
+from dateutil.relativedelta import relativedelta
+from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
+
+
+class PartnerMaintenanceContract(models.Model):
+    _name = 'partner.maintenance.contract'
+    _description = 'Contrato de mantenimiento'
+    _order = 'contract_date'
+
+    partner_id = fields.Many2one(
+        'res.partner',
+        string='Cliente',
+        required=True,
+        ondelete='cascade',
+        index=True,
+    )
+    name = fields.Char(
+        string='Equipo / Descripción',
+        required=True,
+    )
+    contract_date = fields.Date(
+        string='Fecha de inicio',
+        required=True,
+        tracking=True,
+    )
+    maintenance_interval = fields.Selection([
+        ('6', 'Cada 6 meses'),
+        ('12', 'Cada año'),
+    ], string='Frecuencia', required=True, tracking=True)
+
+    maintenance_responsible_id = fields.Many2one(
+        'res.users',
+        string='Responsable',
+        tracking=True,
+    )
+    maintenance_active = fields.Boolean(
+        string='Activo',
+        default=True,
+    )
+    last_maintenance_date = fields.Date(
+        string='Último mantenimiento',
+        tracking=True,
+    )
+    next_maintenance_date = fields.Date(
+        string='Próximo mantenimiento',
+        compute='_compute_next_maintenance_date',
+        store=True,
+    )
+
+    # ── Cómputo ──────────────────────────────────────────────────────────────
+
+    @api.depends('contract_date', 'maintenance_interval', 'last_maintenance_date')
+    def _compute_next_maintenance_date(self):
+        for contract in self:
+            if not contract.contract_date or not contract.maintenance_interval:
+                contract.next_maintenance_date = False
+                continue
+            base_date = contract.last_maintenance_date or contract.contract_date
+            months = int(contract.maintenance_interval)
+            contract.next_maintenance_date = base_date + relativedelta(months=months)
+
+    # ── Acción manual: registrar mantenimiento realizado ─────────────────────
+
+    def action_register_maintenance(self):
+        """Marca el mantenimiento como realizado hoy y recalcula la próxima fecha."""
+        today = fields.Date.today()
+        for contract in self:
+            contract.last_maintenance_date = today
+            contract.partner_id.message_post(
+                body=(
+                    'Mantenimiento registrado para <strong>%s</strong> '
+                    'el <strong>%s</strong>.' % (
+                        contract.name,
+                        today.strftime('%d/%m/%Y'),
+                    )
+                ),
+                subtype_xmlid='mail.mt_note',
+            )
+        return True

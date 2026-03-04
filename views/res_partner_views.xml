@@ -8,7 +8,7 @@
             <xpath expr="//notebook" position="inside">
                 <page string="Mantenimiento" name="maintenance">
                     <field name="maintenance_contract_ids">
-                        <tree editable="bottom" string="Contratos de mantenimiento">
+                        <list editable="bottom" string="Contratos de mantenimiento">
                             <field name="name" placeholder="Ej: Compresor A, Caldera principal…"/>
                             <field name="contract_date"/>
                             <field name="maintenance_interval"/>
@@ -23,7 +23,7 @@
                                 icon="fa-check"
                                 confirm="¿Confirmar que el mantenimiento de este equipo fue realizado hoy?"
                             />
-                        </tree>
+                        </list>
                     </field>
                 </page>
             </xpath>

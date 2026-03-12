@@ -12,7 +12,6 @@ class PartnerMaintenanceImportWizard(models.TransientModel):
         'sale.order',
         string='Orden de venta',
         domain="[('partner_id', '=', partner_id), ('state', 'in', ['sale', 'done'])]",
-        required=True,
     )
     contract_date = fields.Date(
         string='Fecha de inicio del contrato',
@@ -24,12 +23,15 @@ class PartnerMaintenanceImportWizard(models.TransientModel):
         'wizard_id',
         string='Productos',
     )
+    lines_loaded = fields.Boolean(default=False)
 
-    @api.onchange('sale_order_id')
-    def _onchange_sale_order_id(self):
-        self.line_ids = [(5,)]
+    def action_load_products(self):
+        """Carga los productos y números de serie desde la orden de venta seleccionada."""
         if not self.sale_order_id:
-            return
+            raise UserError('Debe seleccionar una orden de venta.')
+
+        # Limpiar líneas anteriores
+        self.line_ids.unlink()
 
         # Recopilar lotes entregados por producto desde entregas confirmadas
         delivered_lots = {}
@@ -43,7 +45,6 @@ class PartnerMaintenanceImportWizard(models.TransientModel):
                 if ml.lot_id:
                     delivered_lots[ml.product_id.id].append(ml.lot_id)
 
-        lines = []
         seen_lot_ids = set()
         for order_line in self.sale_order_id.order_line:
             product = order_line.product_id
@@ -54,23 +55,35 @@ class PartnerMaintenanceImportWizard(models.TransientModel):
                 for lot in lots:
                     if lot.id not in seen_lot_ids:
                         seen_lot_ids.add(lot.id)
-                        lines.append((0, 0, {
+                        self.env['partner.maintenance.import.wizard.line'].create({
+                            'wizard_id': self.id,
                             'product_id': product.id,
                             'lot_id': lot.id,
                             'serial_number': lot.name,
-                            'include': True,
-                        }))
+                            'include': False,
+                        })
             else:
-                lines.append((0, 0, {
+                self.env['partner.maintenance.import.wizard.line'].create({
+                    'wizard_id': self.id,
                     'product_id': product.id,
-                    'include': True,
-                }))
+                    'include': False,
+                })
 
-        self.line_ids = lines
+        self.lines_loaded = True
+
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'partner.maintenance.import.wizard',
+            'view_mode': 'form',
+            'res_id': self.id,
+            'target': 'new',
+        }
 
     def action_create_contracts(self):
         today = fields.Date.today()
         lines_to_create = self.line_ids.filtered('include')
+        if not lines_to_create:
+            raise UserError('No hay productos seleccionados para crear contratos.')
         missing_interval = lines_to_create.filtered(lambda l: not l.maintenance_interval)
         if missing_interval:
             products = ', '.join(l.product_id.display_name or '?' for l in missing_interval)
@@ -98,7 +111,7 @@ class PartnerMaintenanceImportWizardLine(models.TransientModel):
         required=True,
         ondelete='cascade',
     )
-    include = fields.Boolean(string='Incluir', default=True)
+    include = fields.Boolean(string='Incluir', default=False)
     product_id = fields.Many2one('product.product', string='Producto')
     lot_id = fields.Many2one('stock.lot', string='Lote/Serie (Odoo)')
     serial_number = fields.Char(string='N° serie')

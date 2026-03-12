@@ -15,25 +15,29 @@
                             <field name="contract_date"/>
                         </group>
                     </group>
-                    <notebook>
-                        <page string="Productos a incluir">
-                            <field name="line_ids">
-                                <list editable="bottom">
-                                    <field name="include"/>
-                                    <field name="product_id"/>
-                                    <field name="serial_number"/>
-                                    <field name="maintenance_interval" required="include"/>
-                                    <field name="maintenance_responsible_id"/>
-                                </list>
-                            </field>
-                        </page>
-                    </notebook>
+                    <div invisible="lines_loaded">
+                        <button name="action_load_products"
+                                type="object"
+                                string="Cargar productos"
+                                class="btn btn-primary"/>
+                    </div>
+                    <field name="line_ids" invisible="not lines_loaded">
+                        <list editable="bottom">
+                            <field name="include"/>
+                            <field name="product_id" readonly="1"/>
+                            <field name="serial_number"/>
+                            <field name="maintenance_interval"/>
+                            <field name="maintenance_responsible_id"/>
+                        </list>
+                    </field>
+                    <field name="lines_loaded" invisible="1"/>
                 </sheet>
                 <footer>
                     <button name="action_create_contracts"
                             type="object"
                             string="Crear contratos"
                             class="btn-primary"
+                            invisible="not lines_loaded"
                             confirm="¿Crear contratos de mantenimiento para los productos seleccionados?"/>
                     <button string="Cancelar" class="btn-secondary" special="cancel"/>
                 </footer>

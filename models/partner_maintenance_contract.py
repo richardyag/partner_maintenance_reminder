@@ -18,9 +18,23 @@ class PartnerMaintenanceContract(models.Model):
         ondelete='cascade',
         index=True,
     )
+    product_id = fields.Many2one(
+        'product.product',
+        string='Equipo / Producto',
+        required=True,
+    )
     name = fields.Char(
         string='Equipo / Descripción',
-        required=True,
+        compute='_compute_name',
+        store=True,
+    )
+    lot_id = fields.Many2one(
+        'stock.lot',
+        string='N° de serie',
+        domain="[('product_id', '=', product_id)]",
+    )
+    serial_number = fields.Char(
+        string='N° serie (manual)',
     )
     contract_date = fields.Date(
         string='Fecha de inicio',
@@ -53,6 +67,11 @@ class PartnerMaintenanceContract(models.Model):
 
     # ── Cómputo ──────────────────────────────────────────────────────────────
 
+    @api.depends('product_id')
+    def _compute_name(self):
+        for contract in self:
+            contract.name = contract.product_id.display_name or ''
+
     @api.depends('contract_date', 'maintenance_interval', 'last_maintenance_date')
     def _compute_next_maintenance_date(self):
         for contract in self:
@@ -62,6 +81,13 @@ class PartnerMaintenanceContract(models.Model):
             base_date = contract.last_maintenance_date or contract.contract_date
             months = int(contract.maintenance_interval)
             contract.next_maintenance_date = base_date + relativedelta(months=months)
+
+    # ── Onchange ─────────────────────────────────────────────────────────────
+
+    @api.onchange('lot_id')
+    def _onchange_lot_id(self):
+        if self.lot_id:
+            self.serial_number = self.lot_id.name
 
     # ── Acción manual: registrar mantenimiento realizado ─────────────────────
 

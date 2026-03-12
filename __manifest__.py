@@ -1,6 +1,6 @@
 {
     'name': 'Partner Maintenance Reminder',
-    'version': '19.0.2.0.0',
+    'version': '19.0.3.0.0',
     'category': 'Sales/CRM',
     'summary': 'Recordatorios periódicos de mantenimiento preventivo para clientes',
     'description': """
@@ -15,7 +15,7 @@
     'author': 'Econovex',
     'website': 'https://www.econovex.com',
     'license': 'LGPL-3',
-    'depends': ['base', 'mail'],
+    'depends': ['base', 'mail', 'stock'],
     'data': [
         'security/ir.model.access.csv',
         'data/activity_type.xml',

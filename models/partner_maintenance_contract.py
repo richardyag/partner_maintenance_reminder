@@ -39,17 +39,15 @@ class PartnerMaintenanceContract(models.Model):
     contract_date = fields.Date(
         string='Fecha de inicio',
         required=True,
-        tracking=True,
     )
     maintenance_interval = fields.Selection([
         ('6', 'Cada 6 meses'),
         ('12', 'Cada año'),
-    ], string='Frecuencia', required=True, tracking=True)
+    ], string='Frecuencia', required=True)
 
     maintenance_responsible_id = fields.Many2one(
         'res.users',
         string='Responsable',
-        tracking=True,
     )
     maintenance_active = fields.Boolean(
         string='Activo',
@@ -57,7 +55,6 @@ class PartnerMaintenanceContract(models.Model):
     )
     last_maintenance_date = fields.Date(
         string='Último mantenimiento',
-        tracking=True,
     )
     next_maintenance_date = fields.Date(
         string='Próximo mantenimiento',

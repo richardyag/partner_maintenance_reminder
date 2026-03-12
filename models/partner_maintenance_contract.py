@@ -21,7 +21,6 @@ class PartnerMaintenanceContract(models.Model):
     product_id = fields.Many2one(
         'product.product',
         string='Equipo / Producto',
-        required=True,
     )
     name = fields.Char(
         string='Equipo / Descripción',

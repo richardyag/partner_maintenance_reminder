@@ -9,7 +9,7 @@
                 <page string="Mantenimiento" name="maintenance">
                     <field name="maintenance_contract_ids">
                         <list editable="bottom" string="Contratos de mantenimiento">
-                            <field name="product_id" placeholder="Seleccionar producto…"/>
+                            <field name="product_id" placeholder="Seleccionar producto…" required="1"/>
                             <field name="lot_id" domain="[('product_id', '=', product_id)]" options="{'no_create': True}"/>
                             <field name="serial_number" placeholder="N° serie si no está en Odoo"/>
                             <field name="contract_date"/>

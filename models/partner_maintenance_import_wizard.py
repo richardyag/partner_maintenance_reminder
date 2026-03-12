@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class PartnerMaintenanceImportWizard(models.TransientModel):
@@ -69,7 +70,12 @@ class PartnerMaintenanceImportWizard(models.TransientModel):
 
     def action_create_contracts(self):
         today = fields.Date.today()
-        for line in self.line_ids.filtered('include'):
+        lines_to_create = self.line_ids.filtered('include')
+        missing_interval = lines_to_create.filtered(lambda l: not l.maintenance_interval)
+        if missing_interval:
+            products = ', '.join(l.product_id.display_name or '?' for l in missing_interval)
+            raise UserError('Debe indicar la frecuencia para: %s' % products)
+        for line in lines_to_create:
             self.env['partner.maintenance.contract'].create({
                 'partner_id': self.partner_id.id,
                 'product_id': line.product_id.id,
@@ -93,11 +99,11 @@ class PartnerMaintenanceImportWizardLine(models.TransientModel):
         ondelete='cascade',
     )
     include = fields.Boolean(string='Incluir', default=True)
-    product_id = fields.Many2one('product.product', string='Producto', required=True)
+    product_id = fields.Many2one('product.product', string='Producto')
     lot_id = fields.Many2one('stock.lot', string='Lote/Serie (Odoo)')
     serial_number = fields.Char(string='N° serie')
     maintenance_interval = fields.Selection([
         ('6', 'Cada 6 meses'),
         ('12', 'Cada año'),
-    ], string='Frecuencia', required=True)
+    ], string='Frecuencia')
     maintenance_responsible_id = fields.Many2one('res.users', string='Responsable')

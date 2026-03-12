@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_maintenance_import_wizard_form" model="ir.ui.view">
+        <field name="name">partner.maintenance.import.wizard.form</field>
+        <field name="model">partner.maintenance.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Importar contratos desde orden de venta">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="sale_order_id"/>
+                        </group>
+                        <group>
+                            <field name="contract_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Productos a incluir">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="include"/>
+                                    <field name="product_id" readonly="1"/>
+                                    <field name="serial_number"/>
+                                    <field name="maintenance_interval" required="include"/>
+                                    <field name="maintenance_responsible_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button name="action_create_contracts"
+                            type="object"
+                            string="Crear contratos"
+                            class="btn-primary"
+                            confirm="¿Crear contratos de mantenimiento para los productos seleccionados?"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

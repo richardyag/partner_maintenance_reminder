@@ -26,6 +26,18 @@ class ResPartner(models.Model):
         string='Contratos de mantenimiento',
     )
 
+    # ── Acción: abrir wizard de importación desde venta ───────────────────────
+
+    def action_open_maintenance_import(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Importar contratos desde orden de venta',
+            'res_model': 'partner.maintenance.import.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_partner_id': self.id},
+        }
+
     # ── Cron diario ──────────────────────────────────────────────────────────
 
     @api.model

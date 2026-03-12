@@ -7,6 +7,13 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
                 <page string="Mantenimiento" name="maintenance">
+                    <div class="mb-3">
+                        <button name="action_open_maintenance_import"
+                                type="object"
+                                string="Importar desde orden de venta"
+                                icon="fa-shopping-cart"
+                                class="btn btn-secondary"/>
+                    </div>
                     <field name="maintenance_contract_ids">
                         <list editable="bottom" string="Contratos de mantenimiento">
                             <field name="product_id" placeholder="Seleccionar producto…" required="1"/>
